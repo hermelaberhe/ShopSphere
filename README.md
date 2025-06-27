@@ -13,7 +13,6 @@ Welcome to **ShopSphere** – a simple and powerful backend system for an online
 
   * Category (like Electronics or Clothing)
   * Price range (minimum to maximum)
-  * Color (like Red or Black)
 * View detailed information about any product.
 * Add items to a shopping cart.
 * Change quantity or remove items from the cart.
