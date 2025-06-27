@@ -68,7 +68,7 @@ We used **Postman** to test every part of the site, like:
 When users tried to search for items between two prices, the system ignored the price and showed everything.
 
 **How We Fixed It:**
-We improved the part of the code that does the searching. Now it correctly checks the price range before showing results.
+the code that does the searching. Now it correctly checks the price range before showing results.
 
 **The Result:**
 You can now search for products like: "Show me all items between \$10 and \$50 in the Electronics category."
@@ -108,12 +108,4 @@ You can now search for products like: "Show me all items between \$10 and \$50 i
 
 ---
 
-## 🎥 Demo Preparation
-
-During the demo, you'll see:
-
-* Products loading and filtering working properly.
-* An admin user adding or updating a product.
-* A working shopping cart with totals calculated.
-* The fixed bug in action (searching by price now works).
 
