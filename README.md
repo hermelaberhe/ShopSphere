@@ -47,23 +47,18 @@ We used **Postman** to test every part of the site, like:
 
 #### 🔑 Logging in as a New User
 
-![Login - new user](../images/login-new-user.png)
 
 #### 🔑 Logging in as Admin
 
-![Login - admin](../images/login-admin.png)
 
 #### 📄 Getting Categories
 
-![Get Categories](../images/get-categories.png)
 
 #### ⛔️ Access Denied for Non-Admin
 
-![Add Category - not admin](../images/add-category-not-admin.png)
 
 #### ✅ Add Category as Admin
 
-![Add Category - as admin](../images/add-category-admin.png)
 
 ---
 
