@@ -1,6 +1,6 @@
 # 🏩 ShopSphere - E-Commerce API
 
-Welcome to **ShopSphere** – a simple and powerful backend system for an online store. This project was built using Java and a tool called Spring Boot, which helps organize and run the code smoothly. The backend connects to a MySQL database, which stores all the information about products, users, and shopping activity.
+Welcome to **ShopSphere** – a simple and powerful backend system for an online store. This project was built using Java and  Spring Boot, which helps organize and run the code smoothly. The backend connects to a MySQL database, which stores all the information about products, users, and shopping activity.
 
 ---
 
