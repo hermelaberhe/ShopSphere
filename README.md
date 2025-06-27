@@ -67,7 +67,7 @@ We used **Postman** to test every part of the site, like:
 **The Problem:**
 When users tried to search for items between two prices, the system ignored the price and showed everything.
 
-**How We Fixed It:**
+**How I Fixed It:**
 the code that does the searching. Now it correctly checks the price range before showing results.
 
 **The Result:**
