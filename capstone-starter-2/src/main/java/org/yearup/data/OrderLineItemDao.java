@@ -1,9 +1,11 @@
 // OrderLineItem.java
-package org.yearup.models;
+package org.yearup.data;
+
+import org.yearup.models.OrderLineItem;
 
 import java.math.BigDecimal;
 
-public class OrderLineItem
+public class OrderLineItemDao
 {
     private int orderLineItemId;
     private int orderId;
@@ -30,4 +32,11 @@ public class OrderLineItem
 
     public BigDecimal getDiscount() { return discount; }
     public void setDiscount(BigDecimal discount) { this.discount = discount; }
+
+    public void create(OrderLineItem lineItem) {
+    }
+
+    public void deleteByOrderId(int orderId) {
+    }
 }
+

@@ -23,7 +23,7 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
 
         try(Connection connection = getConnection())
         {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setInt(1, profile.getUserId());
             ps.setString(2, profile.getFirstName());
             ps.setString(3, profile.getLastName());
@@ -44,6 +44,7 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
         }
     }
 
+    /// Added new methods
     @Override
     public Profile getByUserId(int userId)
     {

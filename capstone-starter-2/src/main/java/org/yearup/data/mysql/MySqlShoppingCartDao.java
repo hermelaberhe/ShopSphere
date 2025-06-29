@@ -14,12 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Repository
-public class ShoppingCartDaoJdbc implements ShoppingCartDao
+public class MySqlShoppingCartDao implements ShoppingCartDao
 {
     private final JdbcTemplate jdbcTemplate;
     private final ProductDao productDao;
 
-    public ShoppingCartDaoJdbc(JdbcTemplate jdbcTemplate, ProductDao productDao)
+    public MySqlShoppingCartDao(JdbcTemplate jdbcTemplate, ProductDao productDao)
     {
         this.jdbcTemplate = jdbcTemplate;
         this.productDao = productDao;
@@ -97,5 +97,10 @@ public class ShoppingCartDaoJdbc implements ShoppingCartDao
     {
         String sql = "DELETE FROM shopping_cart WHERE user_id = ?";
         jdbcTemplate.update(sql, userId);
+    }
+
+    @Override
+    public void clear(int id) {
+
     }
 }

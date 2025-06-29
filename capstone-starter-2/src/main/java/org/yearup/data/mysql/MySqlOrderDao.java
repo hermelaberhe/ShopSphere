@@ -1,114 +1,126 @@
-package org.yearup.data.mysql;
+package org.yearup.data.mysql;// OrderDaoJdbc.java
 
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import org.yearup.data.OrderDao;
-import org.yearup.models.OrderLineItem;
+import org.yearup.models.Order;
 
-import javax.sql.DataSource;
-import java.sql.*;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.List;
 
-@Component
-public class MySqlOrderDao extends MySqlDaoBase implements OrderDao
+@Repository
+public class MySqlOrderDao implements OrderDao
 {
-    public MySqlOrderDao(DataSource dataSource)
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public MySqlOrderDao(JdbcTemplate jdbcTemplate)
     {
-        super(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public int createOrder(int userId, Date date, String address, String city, String state, String zip, BigDecimal shippingAmount)
+    public Order create(Order order)
     {
-        String sql = "INSERT INTO orders (user_id, date, address, city, state, zip, shipping_amount) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO orders (user_id, date, address, city, state, zip, shipping_amount) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try(Connection connection = getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-        {
-            ps.setInt(1, userId);
-            ps.setTimestamp(2, new Timestamp(date.getTime()));
-            ps.setString(3, address);
-            ps.setString(4, city);
-            ps.setString(5, state);
-            ps.setString(6, zip);
-            ps.setBigDecimal(7, shippingAmount);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-            ps.executeUpdate();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, order.getUserId());
+            ps.setTimestamp(2, Timestamp.valueOf(order.getDate()));
+            ps.setString(3, order.getAddress());
+            ps.setString(4, order.getCity());
+            ps.setString(5, order.getState());
+            ps.setString(6, order.getZip());
+            ps.setBigDecimal(7, order.getShippingAmount());
+            return ps;
+        }, keyHolder);
 
-            try(ResultSet rs = ps.getGeneratedKeys())
-            {
-                if (rs.next())
-                {
-                    return rs.getInt(1); // return generated order_id
-                }
-                else
-                {
-                    throw new SQLException("Failed to retrieve order ID.");
-                }
-            }
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException("Error creating order", e);
-        }
+        int newOrderId = keyHolder.getKey().intValue();
+        order.setOrderId(newOrderId);
+
+        return order;
     }
 
     @Override
-    public void addOrderLineItem(int orderId, int productId, BigDecimal salesPrice, int quantity, BigDecimal discount)
-    {
-        String sql = "INSERT INTO order_line_items (order_id, product_id, sales_price, quantity, discount) VALUES (?, ?, ?, ?, ?)";
+    public List<Order> getOrdersByUserId(int userId) {
+        String sql = "SELECT order_id, user_id, date, address, city, state, zip, shipping_amount, status " +
+                "FROM orders WHERE user_id = ? ORDER BY date DESC";
 
-        try(Connection connection = getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql))
-        {
-            ps.setInt(1, orderId);
-            ps.setInt(2, productId);
-            ps.setBigDecimal(3, salesPrice);
-            ps.setInt(4, quantity);
-            ps.setBigDecimal(5, discount);
-
-            ps.executeUpdate();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException("Error adding order line item", e);
-        }
+        return jdbcTemplate.query(sql, new Object[]{userId}, (rs, rowNum) -> {
+            Order order = new Order();
+            order.setOrderId(rs.getInt("order_id"));
+            order.setUserId(rs.getInt("user_id"));
+            order.setDate(rs.getTimestamp("date").toLocalDateTime());
+            order.setAddress(rs.getString("address"));
+            order.setCity(rs.getString("city"));
+            order.setState(rs.getString("state"));
+            order.setZip(rs.getString("zip"));
+            order.setShippingAmount(rs.getBigDecimal("shipping_amount"));
+            order.setStatus(rs.getString("status"));
+            return order;
+        });
     }
-
     @Override
-    public List<OrderLineItem> getOrderLineItemsByOrderId(int orderId)
+    public List<Order> getAllOrders()
     {
-        List<OrderLineItem> items = new ArrayList<>();
-        String sql = "SELECT order_line_item_id, order_id, product_id, sales_price, quantity, discount FROM order_line_items WHERE order_id = ?";
+        String sql = "SELECT * FROM orders";
 
-        try(Connection connection = getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql))
-        {
-            ps.setInt(1, orderId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Order order = new Order();
+            order.setOrderId(rs.getInt("order_id"));
+            order.setUserId(rs.getInt("user_id"));
+            order.setDate(rs.getTimestamp("date").toLocalDateTime());
+            order.setAddress(rs.getString("address"));
+            order.setCity(rs.getString("city"));
+            order.setState(rs.getString("state"));
+            order.setZip(rs.getString("zip"));
+            order.setShippingAmount(rs.getBigDecimal("shipping_amount"));
+            order.setStatus(rs.getString("status"));
+            return order;
+        });
+    }
+    public void update(Order order) {
+        String sql = """
+        UPDATE orders SET
+            status = ?,
+            address = ?, city = ?, state = ?, zip = ?, shipping_amount = ?
+        WHERE order_id = ?
+        """;
+        jdbcTemplate.update(sql,
+                order.getStatus(),
+                order.getAddress(), order.getCity(), order.getState(), order.getZip(),
+                order.getShippingAmount(),
+                order.getOrderId());
+    }
+    public Order getById(int orderId) {
+        String sql = "SELECT * FROM orders WHERE order_id = ?";
 
-            try(ResultSet rs = ps.executeQuery())
-            {
-                while (rs.next())
-                {
-                    OrderLineItem item = new OrderLineItem();
-                    item.setOrderLineItemId(rs.getInt("order_line_item_id"));
-                    item.setOrderId(rs.getInt("order_id"));
-                    item.setProductId(rs.getInt("product_id"));
-                    item.setSalesPrice(rs.getBigDecimal("sales_price"));
-                    item.setQuantity(rs.getInt("quantity"));
-                    item.setDiscount(rs.getBigDecimal("discount"));
-
-                    items.add(item);
-                }
-            }
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException("Error getting order line items", e);
-        }
-
-        return items;
+        return jdbcTemplate.queryForObject(sql, new Object[]{orderId}, (rs, rowNum) -> {
+            Order order = new Order();
+            order.setOrderId(rs.getInt("order_id"));
+            order.setUserId(rs.getInt("user_id"));
+            order.setDate(rs.getTimestamp("date").toLocalDateTime());
+            order.setAddress(rs.getString("address"));
+            order.setCity(rs.getString("city"));
+            order.setState(rs.getString("state"));
+            order.setZip(rs.getString("zip"));
+            order.setShippingAmount(rs.getBigDecimal("shipping_amount"));
+            order.setStatus(rs.getString("status")); // Include status
+            return order;
+        });
+    }
+    @Override
+    public void delete(int orderId) {
+        String sql = "DELETE FROM orders WHERE order_id = ?";
+        jdbcTemplate.update(sql, orderId);
     }
 }
